@@ -8,8 +8,8 @@ const db = knex({
   client: 'pg',
   connection: {
     host : '127.0.0.1',
-    user : 'aneagoie',
-    password : '',
+    user : 'ronin',
+    password : '1234',
     database : 'smart-brain'
   }
 });
@@ -94,7 +94,7 @@ app.put('/image', (req, res) => {
   .increment('entries', 1)
   .returning('entries')
   .then(entries => {
-    // If you are using knex.js version 1.0.0 or higher this now returns an array of objects. Therefore, the code goes from:
+    // In knex.js version 1.0.0 or higher this now returns an array of objects. Therefore, the code goes from:
     // entries[0] --> this used to return the entries
     // TO
     // entries[0].entries --> this now returns the entries
