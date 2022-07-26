@@ -8,30 +8,56 @@ const db = knex({
   client: 'pg',
   connection: {
     host : '127.0.0.1',
-    user : 'ronin',
+    port: 5432,
+    user : 'postgres',
     password : '1234',
-    database : 'smart-brain'
+    database : 'smart-brains',
+    
   }
-});
+})
+
+// const { Client } = require('pg')
+// const db = new Client({
+//   user: 'postgres',
+//   host: '127.0.0.1',
+//   database: 'smart-brains',
+//   password: '1234',
+//   // port:"5432"
+ 
+// })
+// db.connect(function(err) {
+//   if (err){
+//     console.log(err);
+//     throw err;
+//   }
+//   console.log("Connected!");
+// });
 
 const app = express();
-
+// console.log(app);
 app.use(cors())
 app.use(express.json()); // latest version of exressJS now comes with Body-Parser!
 
-
+app.get("/check",(req,res) => {
+  res.json("Connected");
+})
 app.get('/', (req, res)=> {
-  res.send(database.users);
+  // db.select("*").from("users");
+  
 })
 
 app.post('/signin', (req, res) => {
+  const { email, password } = req.body;
+  if(!email || !password){
+    return res.status(400).json("incorrect form submission")
+  }
   db.select('email', 'hash').from('login')
-    .where('email', '=', req.body.email)
+    .where('email', '=', email)
     .then(data => {
-      const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+      const isValid = bcrypt.compareSync(password, data[0].hash);
       if (isValid) {
         return db.select('*').from('users')
-          .where('email', '=', req.body.email)
+          .where('email', '=', email)
           .then(user => {
             res.json(user[0])
           })
@@ -45,6 +71,9 @@ app.post('/signin', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { email, name, password } = req.body;
+  if(!email || !name || !password){
+    return res.status(400).json("incorrect form submission")
+  }
   const hash = bcrypt.hashSync(password);
     db.transaction(trx => {
       trx.insert({
